@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  searxng:
+    container_name: searxng
+    image: searxng/searxng:2025.5.31-93751b6
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./searxng:/etc/searxng
+    environment:
+      - BASE_URL=http://localhost:8080/
+      - INSTANCE_NAME=my-instance
+    restart: unless-stopped
+
+  rag-agent:
+    container_name: rag-agent
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "18080:18080"
+    environment:
+      - SEARXNG_BASE_URL=http://searxng:8080
+      - OPENAI_BASE_URL=http://10.1.1.68:80/v1
+      - OPENAI_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NDI3NDQ4NzAsIm5hbWUiOiJhZG1pbiJ9.dnn3Cl8LwJh7fFuLufARoz1evzEBKf9Gfr3n1hHDgN0
+      - CHAT_MODEL=gemma3:12b
+      - EMBED_MODEL=all-minilm:22m
+      # ROOT_PATH(Option) 資源請求的根路徑: 適用於向代理多服務情境
+      - ROOT_PATH=/rag-agent-demo
+    restart: unless-stopped
